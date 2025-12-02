@@ -1,6 +1,6 @@
 Flask==2.3.0
 Flask-CORS==4.0.0
-pandas==1.5.3
+pandas==2.3.3
 docxtpl==0.16.4
 docx2pdf==0.1.8
 python-docx==0.8.11
