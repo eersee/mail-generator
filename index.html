@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail Generator - Генератор писем</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: #667eea;
+            border-radius: 2px;
+            margin-right: 12px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragging {
+            border-color: #764ba2;
+            background: #e8ecff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .upload-text strong {
+            color: #333;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            color: #2e7d32;
+            font-weight: 500;
+            display: none;
+        }
+
+        .file-name.show {
+            display: block;
+        }
+
+        .file-name.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            color: #1565c0;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #0d47a1;
+        }
+
+        .mapping-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .mapping-section.show {
+            display: block;
+        }
+
+        .mapping-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .mapping-item label {
+            display: block;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .mapping-item select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .mapping-item .template-var {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            word-break: break-word;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.show {
+            display: inline-block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .status.warning {
+            background: #fff3e0;
+            color: #e65100;
+            border-left: 4px solid #ff9800;
+        }
+
+        .variables-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .variable-tag {
+            background: white;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        .table-preview {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        .table-preview table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .table-preview th,
+        .table-preview td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table-preview th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-preview tr:hover {
+            background: #f9f9f9;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .mapping-item {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Mail Generator</h1>
+            <p>Генерируй письма из шаблона и таблицы контактов</p>
+        </div>
+
+        <div class="content">
+            <!-- Раздел 1: Загрузка шаблона -->
+            <div class="section">
+                <div class="section-title">Шаг 1: Загрузи шаблон письма</div>
+                <div class="upload-area" id="templateArea">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Перетащи файл <strong>.docx</strong> или кликни для выбора</div>
+                    <div style="font-size: 0.85em; color: #999; margin-top: 5px;">Поддерживается Word 2007+ формат</div>
+                </div>
+                <input type="file" id="templateInput" class="file-input" accept=".docx" />
+                <div id="templateName" class="file-name"></div>
+                <div id="templateStatus" class="info-box" style="display: none;"></div>
+            </div>
+
+            <!-- Раздел 2: Загрузка CSV -->
+            <div class="section">
+                <div class="section-title">Шаг 2: Загрузи таблицу контактов</div>
+                <div class="upload-area" id="csvArea">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-text">Перетащи файл <strong>.csv</strong> или кликни для выбора</div>
+                    <div style="font-size: 0.85em; color: #999; margin-top: 5px;">Разделитель: точка с запятой (;)</div>
+                </div>
+                <input type="file" id="csvInput" class="file-input" accept=".csv" />
+                <div id="csvName" class="file-name"></div>
+                <div id="csvStatus" class="info-box" style="display: none;"></div>
+                <div id="csvPreview" class="table-preview" style="display: none;">
+                    <table id="previewTable"></table>
+                </div>
+            </div>
+
+            <!-- Раздел 3: Маппинг полей -->
+            <div class="section">
+                <div class="section-title">Шаг 3: Свяжи поля (если нужно)</div>
+                <div style="color: #666; font-size: 0.95em; margin-bottom: 15px;">
+                    Укажи, какие столбцы из таблицы соответствуют переменным в шаблоне.
+                    Если названия совпадают, маппинг произойдет автоматически.
+                </div>
+                <div id="mappingSection" class="mapping-section">
+                    <div id="mappingContainer"></div>
+                </div>
+                <div id="readyMessage" style="display: none; padding: 12px; background: #e8f5e9; border-radius: 6px; color: #2e7d32;">
+                    ✓ Все поля готовы. Можешь генерировать документы!
+                </div>
+            </div>
+
+            <!-- Раздел 4: Действия -->
+            <div class="section">
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="resetBtn">↻ Сбросить</button>
+                    <button class="btn btn-primary" id="generateBtn" disabled>
+                        <span class="loading" id="loadingSpinner">
+                            <div class="spinner"></div>
+                        </span>
+                        Генерировать архив
+                    </button>
+                </div>
+                <div id="statusMessage" class="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API base URL (измени если backend на другом сервере)
+        const API_BASE_URL = 'http://localhost:5000';
+
+        let templateData = null;
+        let csvData = null;
+        let fieldMapping = {};
+
+        // ============ Функции загрузки файлов ============
+        function setupFileUpload(areaId, inputId, nameId, statusId, handler) {
+            const area = document.getElementById(areaId);
+            const input = document.getElementById(inputId);
+            const nameDiv = document.getElementById(nameId);
+            const statusDiv = document.getElementById(statusId);
+
+            // Клик по области
+            area.addEventListener('click', () => input.click());
+
+            // Drag and drop
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragging');
+            });
+
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragging');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragging');
+                handleFiles(e.dataTransfer.files, handler, input, nameDiv, statusDiv);
+            });
+
+            input.addEventListener('change', (e) => {
+                handleFiles(e.target.files, handler, input, nameDiv, statusDiv);
+            });
+        }
+
+        function handleFiles(files, handler, input, nameDiv, statusDiv) {
+            if (files.length === 0) return;
+            const file = files[0];
+            
+            if (!file) return;
+
+            nameDiv.textContent = `✓ Загружено: ${file.name}`;
+            nameDiv.classList.add('show');
+            nameDiv.classList.remove('error');
+            
+            handler(file, nameDiv, statusDiv, input);
+        }
+
+        // Загрузка и превью шаблона
+        function handleTemplateUpload(file, nameDiv, statusDiv, input) {
+            const formData = new FormData();
+            formData.append('template', file);
+
+            statusDiv.style.display = 'none';
+            nameDiv.textContent = `⏳ Загрузка ${file.name}...`;
+
+            fetch(`${API_BASE_URL}/api/preview-template`, {
+                method: 'POST',
+                body: formData,
+                mode: 'cors'
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                
+                templateData = {
+                    file: file,
+                    variables: data.variables
+                };
+
+                nameDiv.textContent = `✓ Шаблон загружен: ${file.name}`;
+                statusDiv.innerHTML = `<strong>Переменные в шаблоне:</strong>` +
+                    `<div class="variables-list">` +
+                    data.variables.map(v => `<div class="variable-tag">${v}</div>`).join('') +
+                    `</div>`;
+                statusDiv.style.display = 'block';
+
+                updateMappingUI();
+                checkReady();
+            })
+            .catch(err => {
+                nameDiv.textContent = `✗ Ошибка: ${err.message}`;
+                nameDiv.classList.add('error');
+                templateData = null;
+            });
+        }
+
+        // Загрузка и превью CSV
+        function handleCSVUpload(file, nameDiv, statusDiv, input) {
+            const formData = new FormData();
+            formData.append('csv', file);
+
+            statusDiv.style.display = 'none';
+            nameDiv.textContent = `⏳ Загрузка ${file.name}...`;
+
+            fetch(`${API_BASE_URL}/api/preview-csv`, {
+                method: 'POST',
+                body: formData,
+                mode: 'cors'
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                
+                csvData = {
+                    file: file,
+                    columns: data.columns,
+                    preview: data.preview,
+                    rowCount: data.rowCount
+                };
+
+                nameDiv.textContent = `✓ Таблица загружена: ${file.name} (${data.rowCount} строк)`;
+                
+                // Показываем превью
+                showTablePreview(data);
+                
+                statusDiv.innerHTML = `<strong>Столбцы в таблице:</strong> ${data.columns.join(', ')}`;
+                statusDiv.style.display = 'block';
+
+                updateMappingUI();
+                checkReady();
+            })
+            .catch(err => {
+                nameDiv.textContent = `✗ Ошибка: ${err.message}`;
+                nameDiv.classList.add('error');
+                csvData = null;
+            });
+        }
+
+        function showTablePreview(data) {
+            const previewDiv = document.getElementById('csvPreview');
+            const table = document.getElementById('previewTable');
+            
+            table.innerHTML = '';
+            
+            // Header
+            const headerRow = document.createElement('tr');
+            data.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+            
+            // Data rows
+            data.preview.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell || '—';
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            
+            previewDiv.style.display = 'block';
+        }
+
+        // ============ Маппинг полей ============
+        function updateMappingUI() {
+            if (!templateData || !csvData) {
+                document.getElementById('mappingSection').classList.remove('show');
+                return;
+            }
+
+            const container = document.getElementById('mappingContainer');
+            container.innerHTML = '';
+
+            templateData.variables.forEach(varName => {
+                const matchedColumn = csvData.columns.find(col => col.toLowerCase() === varName.toLowerCase());
+                fieldMapping[varName] = matchedColumn || (csvData.columns[0] || '');
+
+                const item = document.createElement('div');
+                item.className = 'mapping-item';
+                
+                const label1 = document.createElement('label');
+                label1.textContent = 'Переменная в шаблоне';
+                const template_var = document.createElement('div');
+                template_var.className = 'template-var';
+                template_var.textContent = `{${varName}}`;
+                
+                const label2 = document.createElement('label');
+                label2.textContent = 'Столбец в таблице';
+                const select = document.createElement('select');
+                
+                select.innerHTML = csvData.columns
+                    .map(col => `<option value="${col}" ${(fieldMapping[varName] === col) ? 'selected' : ''}>${col}</option>`)
+                    .join('');
+                
+                select.addEventListener('change', (e) => {
+                    fieldMapping[varName] = e.target.value;
+                });
+
+                const div1 = document.createElement('div');
+                div1.appendChild(label1);
+                div1.appendChild(template_var);
+                
+                const div2 = document.createElement('div');
+                div2.appendChild(label2);
+                div2.appendChild(select);
+                
+                item.appendChild(div1);
+                item.appendChild(div2);
+                container.appendChild(item);
+            });
+
+            document.getElementById('mappingSection').classList.add('show');
+        }
+
+        function checkReady() {
+            const ready = templateData && csvData;
+            document.getElementById('generateBtn').disabled = !ready;
+            document.getElementById('readyMessage').style.display = ready ? 'block' : 'none';
+        }
+
+        // ============ Генерация документов ============
+        document.getElementById('generateBtn').addEventListener('click', generateDocuments);
+
+        function generateDocuments() {
+            if (!templateData || !csvData) return;
+
+            const btn = document.getElementById('generateBtn');
+            const statusDiv = document.getElementById('statusMessage');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            btn.disabled = true;
+            loadingSpinner.classList.add('show');
+            statusDiv.classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('template', templateData.file);
+            formData.append('csv', csvData.file);
+            formData.append('mapping', JSON.stringify(fieldMapping));
+
+            fetch(`${API_BASE_URL}/api/generate`, {
+                method: 'POST',
+                body: formData,
+                mode: 'cors'
+            })
+            .then(response => {
+                if (!response.ok) return response.json().then(e => { throw new Error(e.error || 'Ошибка сервера'); });
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `documents_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                statusDiv.className = 'status success show';
+                statusDiv.textContent = '✓ Архив успешно загружен! Начал загрузку файла.';
+
+                loadingSpinner.classList.remove('show');
+                btn.disabled = false;
+            })
+            .catch(err => {
+                statusDiv.className = 'status error show';
+                statusDiv.textContent = `✗ Ошибка: ${err.message}`;
+
+                loadingSpinner.classList.remove('show');
+                btn.disabled = false;
+            });
+        }
+
+        // ============ Сброс ============
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        // ============ Инициализация ============
+        setupFileUpload('templateArea', 'templateInput', 'templateName', 'templateStatus', handleTemplateUpload);
+        setupFileUpload('csvArea', 'csvInput', 'csvName', 'csvStatus', handleCSVUpload);
+    </script>
+</body>
+</html>
