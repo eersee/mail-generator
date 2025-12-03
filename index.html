@@ -437,7 +437,12 @@
 
     <script>
         // API base URL (измени если backend на другом сервере)
-        const API_BASE_URL = 'https://mail-generator-z6jt.onrender.com';
+        const API_BASE_URL = (() => {
+            if (window.location.hostname === 'localhost') {
+            return 'http://localhost:5000';  // Локально
+            }
+            return `${window.location.protocol}//${window.location.host}`;  // Везде
+        })();
 
         let templateData = null;
         let csvData = null;
